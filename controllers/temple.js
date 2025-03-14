@@ -12,10 +12,12 @@ exports.create = async (req, res) => {
 
   // Create a Temple
   const temple = new Temple({
+    _id: req.body._id,
     temple_id: req.body.temple_id,
+    additionalInfo: req.body.additionalInfo,
     name: req.body.name,
-    description: req.body.description,
     location: req.body.location,
+    dedicated: req.body.dedicated,
   });
 
   try {
@@ -29,6 +31,7 @@ exports.create = async (req, res) => {
   }
 };
 
+// Retrieve all Temples
 exports.findAll = async (req, res) => {
   if (req.header('apiKey') !== apiKey) {
     res.send('Invalid apiKey, please read the documentation.');
@@ -36,17 +39,7 @@ exports.findAll = async (req, res) => {
   }
 
   try {
-    const data = await Temple.find(
-      {},
-      {
-        temple_id: 1,
-        name: 1,
-        location: 1,
-        dedicated: 1,
-        additionalInfo: 1,
-        _id: 0,
-      }
-    );
+    const data = await Temple.find({}).select('-_id -__v');
     res.send(data);
   } catch (err) {
     res.status(500).send({
@@ -65,7 +58,7 @@ exports.findOne = async (req, res) => {
   }
 
   try {
-    const data = await Temple.find({ temple_id: temple_id });
+    const data = await Temple.find({ temple_id: temple_id }).select('-_id -__v');
     if (!data)
       res
         .status(404)
@@ -91,7 +84,7 @@ exports.update = async (req, res) => {
   try {
     const data = await Temple.findByIdAndUpdate(id, req.body, {
       useFindAndModify: false,
-    });
+    }).select('-_id -__v');
     if (!data) {
       res.status(404).send({
         message: `Cannot update Temple with id=${id}. Maybe Temple was not found!`,
@@ -111,7 +104,7 @@ exports.delete = async (req, res) => {
   const id = req.params.id;
 
   try {
-    const data = await Temple.findByIdAndRemove(id);
+    const data = await Temple.findByIdAndDelete(id).select('-_id -__v');
     if (!data) {
       res.status(404).send({
         message: `Cannot delete Temple with id=${id}. Maybe Temple was not found!`,
@@ -122,6 +115,7 @@ exports.delete = async (req, res) => {
       });
     }
   } catch (err) {
+    console.error(err); // Log the error
     res.status(500).send({
       message: 'Could not delete Temple with id=' + id,
     });
@@ -131,7 +125,7 @@ exports.delete = async (req, res) => {
 // Delete all Temples from the database.
 exports.deleteAll = async (req, res) => {
   try {
-    const data = await Temple.deleteMany({});
+    const data = await Temple.deleteMany({}).select('-_id -__v');
     res.send({
       message: `${data.deletedCount} Temples were deleted successfully!`,
     });
@@ -146,9 +140,12 @@ exports.deleteAll = async (req, res) => {
 // Find all published Temples
 exports.findAllPublished = async (req, res) => {
   try {
-    const data = await Temple.find({
-      dedicated: { $nin: ['Construction', 'Announced'] },//Construction and Announced are not published
-    });
+    const data = await Temple.find(
+      {
+        dedicated: { $nin: ['Construction', 'Announced'] }, //Announced and Construction are not published
+      },
+      '-_id -__v' 
+    );
     res.json(data);
   } catch (err) {
     console.error(err);
