@@ -1,44 +1,35 @@
-//w01-project/config/swagger.js
-// Configuration for Swagger for testing and documentation
+// swagger.js
 const swaggerJsdoc = require('swagger-jsdoc');
 
 const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'My Project1 API',
+      title: 'Temples API',
       version: '1.0.0',
-      description: 'API for managing contacts',
+      description: 'API for managing temple information',
     },
     servers: [
       {
-        url: 'https://cse341-w01-project-f4cy.onrender.com',
+        url: 'http://localhost:8080', // Adjust to your server URL
       },
     ],
     components: {
-      schemas: {
-        Contact: {
-          type: 'object',
-          properties: {
-            username: { type: 'string', required: true, unique: true },
-            email: { type: 'string', required: true, unique: true },
-            firstName: { type: 'string' },
-            lastName: { type: 'string' },
-            role: { type: 'string' },
-            favoriteColor: { type: 'string', enum: ['red', 'green', 'blue'] },
-            projects: {
-              type: 'array',
-              items: { type: 'string' },
-            },
-            active: { type: 'boolean' },
-            joinedDate: { type: 'string', format: 'date-time' },
-            lastLoginIP: { type: 'string' },
-          },
+      securitySchemes: {
+        apiKeyAuth: {
+          type: 'apiKey',
+          in: 'header',
+          name: 'apiKey',
         },
       },
     },
+    security: [
+      {
+        apiKeyAuth: [],
+      },
+    ],
   },
-  apis: ['./app/routes/*.js'], // Path to your route files
+  apis: ['./routes/temple.js'], // Path to your routes
 };
 
 module.exports = swaggerJsdoc(options);
