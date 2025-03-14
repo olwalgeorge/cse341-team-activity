@@ -11,8 +11,6 @@ routes.delete('/', temples.deleteAll);
 
 routes.delete('/:id', temples.delete);
 
-
-
 routes.put('/:id', temples.update);
 
 module.exports = routes;
