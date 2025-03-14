@@ -146,15 +146,16 @@ exports.deleteAll = (req, res) => {
 };
 
 // Find all published Temples
-exports.findAllPublished = (req, res) => {
-  Temple.find({ published: true })
-    .then((data) => {
-      res.send(data);
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message:
-          err.message || 'Some error occurred while retrieving temple.',
-      });
+exports.findAllPublished = async (req, res) => {
+  try {
+    const data = await Temple.find({
+      dedicated: { $nin: ['Construction', 'Announced'] },//Construction and Announced are not published
     });
+    res.json(data);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({
+      message: err.message || 'Some error occurred while retrieving published temples.',
+    });
+  }
 };
